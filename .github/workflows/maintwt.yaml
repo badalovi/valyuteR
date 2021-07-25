@@ -1,0 +1,37 @@
+name: autotweeting
+# Controls when the action will run.
+on:
+  push:
+    branhes: main
+  
+  #schedule:
+  #  - cron:  '35 7 * * *'
+
+jobs: 
+  autotweet:
+    # The type of runner that the job will run on
+    runs-on: macos-latest
+    # Load repo and install R
+    steps:
+    - uses: actions/checkout@master
+    - uses: r-lib/actions/setup-r@master
+    # Set-up R
+    - name: Install packages
+      run: |
+        R -e 'install.packages("rtweet")'
+        R -e 'install.packages("dplyr")'
+        R -e 'install.packages("readxl")'
+        R -e 'install.packages("rvest")'
+    # Run R script
+    - name: posttweet 
+      run: Rscript twtscript.R
+
+
+    env:
+      APPNAME_TWT: ${{secrets.APPNAME_TWT}}
+      KEY_TWT: ${{secrets.KEY_TWT}}
+      SECRET_TWT: ${{secrets.SECRET_TWT}}
+      ACCESS_TOKEN_TWT: ${{secrets.ACCESS_TOKEN_TWT}}
+      ACCESS_SECRET_TWT: ${{secrets.ACCESS_SECRET_TWT}}
+
+  
