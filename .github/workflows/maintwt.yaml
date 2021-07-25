@@ -1,4 +1,4 @@
-name: autotweeting
+name: valyuteRtwt
 # Controls when the action will run.
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
         R -e 'install.packages("readxl")'
         R -e 'install.packages("rvest")'
     # Run R script
-    - name: posttweet 
+    - name: pushtwt 
       run: Rscript twtscript.R
 
 

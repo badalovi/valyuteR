@@ -20,9 +20,10 @@ df_usd <- page_usd %>%
   html_table() %>%
   .[[1]] %>%
   tibble() %>%
-  mutate(Bank_buys =as.numeric(.[[2]]),       #Storing Bank_Buys and Buys_Sells
-         Bank_sells=as.numeric(.[[3]])) %>%   #Values as numeric
-  select(1,7,8)
+  mutate(Bank_Buys =as.numeric(.[[2]]),       #Storing Bank_Buys and Buys_Sells
+         Bank_Sells=as.numeric(.[[3]])) %>%   #Values as numeric
+  select(1,7,8) %>% 
+  rename(Bank_Name=1)
 
 
 df_eur <- page_eur %>%
@@ -30,56 +31,50 @@ df_eur <- page_eur %>%
   html_table() %>%
   .[[1]] %>%
   tibble() %>%
-  mutate(Bank_buys =as.numeric(.[[2]]),      #Storing Bank_Buys and Buys_Sells
-         Bank_sells=as.numeric(.[[3]])) %>%  #Values as numeric
-  select(1,7,8)
+  mutate(Bank_Buys =as.numeric(.[[2]]),      #Storing Bank_Buys and Buys_Sells
+         Bank_Sells=as.numeric(.[[3]])) %>%  #Values as numeric
+  select(1,7,8) %>% 
+  rename(Bank_Name=1)
+
 
 df_rub <- page_rub %>%
   html_nodes('#table-rates') %>%
   html_table() %>%
   .[[1]] %>%
   tibble() %>%
-  mutate(Bank_buys =as.numeric(.[[2]]),       #Storing Bank_Buys and Buys_Sells
-         Bank_sells=as.numeric(.[[3]])) %>%   #Values as numeric
-  select(1,7,8)
+  mutate(Bank_Buys =as.numeric(.[[2]]),       #Storing Bank_Buys and Buys_Sells
+         Bank_Sells=as.numeric(.[[3]])) %>%   #Values as numeric
+  select(1,7,8) %>% 
+  rename(Bank_Name=1)
 
 
-
-names(df_usd) <- c('Bank_Name','Bank_Buys','Bank_Sells')
-names(df_eur) <- c('Bank_Name','Bank_Buys','Bank_Sells')
-names(df_rub) <- c('Bank_Name','Bank_Buys','Bank_Sells')
 
 #Dropping Ireelevant Banks
 
 v_reg_usd <- c('AFB.','Melli','Avrasiya','Premium','Nax..van',
-               'ASB','Pak.stan','Az.rp','Xalq')
+               'ASB','Pak.stan','Az.rp','Xalq','Eliko')
 v_reg_eur <- c('AFB.','Melli','Avrasiya','Premium','Nax..van',
-               'ASB','Az.rp','Xalq')
+               'ASB','Az.rp','Xalq','Eliko')
 v_reg_rub <- c('AFB.','Melli','Avrasiya','Premium','Nax..van',
-               'ASB','Az.rp')
+               'ASB','Az.rp','Eliko')
 
-vec_drp_usd <-sapply(v_reg_usd,function(x) grep(x, df_usd$Bank_Name),USE.NAMES = FALSE)
-vec_drp_eur <-sapply(v_reg_eur,function(x) grep(x, df_eur$Bank_Name),USE.NAMES = FALSE)
-vec_drp_rub <-sapply(v_reg_rub,function(x) grep(x, df_rub$Bank_Name),USE.NAMES = FALSE)
-
-
-df_usd_full <- df_usd %>% slice(-vec_drp_usd)
-df_eur_full <- df_eur %>% slice(-vec_drp_eur)
-df_rub_full <- df_rub %>% slice(-vec_drp_rub)
+vec_drp_usd <- Filter(length,sapply(v_reg_usd,function(x) grep(x, df_usd$Bank_Name)))
+vec_drp_eur <- Filter(length,sapply(v_reg_eur,function(x) grep(x, df_eur$Bank_Name)))
+vec_drp_rub <- Filter(length,sapply(v_reg_rub,function(x) grep(x, df_rub$Bank_Name)))
 
 
-#Combining Data With Additional Data
-df_usd_final <- df_usd_full %>%
+df_usd_final <- df_usd %>% slice(-unlist(vec_drp_usd)) %>% 
   left_join(df_branches,by=c('Bank_Name'='Bank_Name_Org'))
 
-df_eur_final <- df_eur_full %>%
+df_eur_final <- df_eur %>% slice(-unlist(vec_drp_eur)) %>% 
   left_join(df_branches,by=c('Bank_Name'='Bank_Name_Org'))
 
-df_rub_final <- df_rub_full %>%
+df_rub_final <- df_rub %>% slice(-unlist(vec_drp_rub)) %>% 
   left_join(df_branches,by=c('Bank_Name'='Bank_Name_Org'))
 
 
-usd_val_buy <-df_usd_final %>%
+# Buy Values
+usd_val_buy <- df_usd_final %>%
   arrange(-Bank_Buys,-Branch_Num) %>%
   select(Bank_Name,Bank_Name_Az,Bank_Buys) %>%
   slice(1)
@@ -95,7 +90,7 @@ rub_val_buy <-df_rub_final %>%
   slice(1)
 
 
-
+# Sell Values
 usd_val_sell <- df_usd_final %>%
   arrange(Bank_Sells,-Branch_Num) %>%
   select(Bank_Name,Bank_Name_Az,Bank_Sells) %>%
@@ -110,9 +105,6 @@ rub_val_sell <-df_rub_final %>%
   arrange(Bank_Sells,-Branch_Num) %>%
   select(Bank_Name,Bank_Name_Az,Bank_Sells) %>%
   slice(1)
-
-
-
 
 
 # Twitter
@@ -133,13 +125,13 @@ twitter_token <- create_token(
 
  
  
-f_currency <- function(x){
+f_currency <- function(x){ #Standardize currency decimals
   ifelse(nchar(x)==6,x,paste0(x,
                               paste(rep('0',6-nchar(x)),collapse = '')))
 }
 
 
-bold_twt <- function(dt){
+bold_twt <- function(dt){ # Encoding characters to bold
   x <- as.character(dt)
   full_char<- substring(x, 1:nchar(x), 1:nchar(x))
 
