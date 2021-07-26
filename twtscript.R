@@ -161,7 +161,7 @@ post_text <- paste0('\n\U0001F4C5 ',bold_twt(Sys.Date()),' ',
                     ' - ',f_currency(rub_val_buy$Bank_Buys),
                     '\n\n\U0001F4C9',txts[[1]][2],'\n\U0001F1FA\U0001F1F8USD: ',
                     usd_val_sell$Bank_Name_Az,' - ',f_currency(usd_val_sell$Bank_Sells),
-                    '\n\U0001F1EA\U0001F1FAEUREUR: ', eur_val_sell$Bank_Name_Az,' - ',f_currency(eur_val_sell$Bank_Sells),
+                    '\n\U0001F1EA\U0001F1FAEUR: ', eur_val_sell$Bank_Name_Az,' - ',f_currency(eur_val_sell$Bank_Sells),
                     '\n\U0001F1F7\U0001F1FARUB: ', rub_val_sell$Bank_Name_Az,' - ',f_currency(rub_val_sell$Bank_Sells),
                     '\n')
 
